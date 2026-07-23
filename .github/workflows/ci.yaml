@@ -23,6 +23,10 @@ jobs:
     steps:
       - name: Récupération du code (commit)
         uses: actions/checkout@v4
+      - name: Normaliser le nom de l'image en minuscules
+        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/sada-bousso-app" >> $GITHUB_ENV
+      - name: Normaliser le nom de l'image en minuscules
+        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/sada-bousso-app" >> $GITHUB_ENV
 
       - name: Installer Python
         uses: actions/setup-python@v5
