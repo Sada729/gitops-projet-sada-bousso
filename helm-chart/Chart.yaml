@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sada-bousso-app
+description: Application web GitOps de Sada Bousso
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
