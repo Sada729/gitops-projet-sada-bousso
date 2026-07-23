@@ -7,10 +7,10 @@ replicaCount: 2
 
 image:
   repository: ghcr.io/sada729/sada-bousso-app
-  tag: "1.1.0"
+  tag: "1.0.0"
   pullPolicy: IfNotPresent
 
-appVersion: "1.1.0"
+appVersion: "1.0.0"
 
 service:
   type: ClusterIP
