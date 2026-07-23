@@ -1,5 +1,4 @@
-name: CI - build, tests, helm lint, scan, push
-
+﻿name: CI - build, tests, helm lint, scan, push
 on:
   push:
     branches: [ "main" ]
@@ -9,51 +8,41 @@ on:
       - "Dockerfile"
       - "helm-chart/**"
       - ".github/workflows/ci.yaml"
-
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/sada-bousso-app
-
 jobs:
   build-test-scan-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Récupération du code (commit)
         uses: actions/checkout@v4
       - name: Normaliser le nom de l'image en minuscules
         run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/sada-bousso-app" >> $GITHUB_ENV
-      - name: Normaliser le nom de l'image en minuscules
-        run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/sada-bousso-app" >> $GITHUB_ENV
-
+      - name: Extraire la version applicative depuis values.yaml
+        run: echo "APP_VERSION=$(grep 'appVersion:' helm-chart/values.yaml | head -1 | sed 's/.*: *"\(.*\)"/\1/')" >> $GITHUB_ENV
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Installer les dépendances et lancer les tests
         run: |
           pip install -r requirements.txt pytest
           pytest -v
-
       - name: Installer Helm
         uses: azure/setup-helm@v4
-
       - name: Lint du chart Helm
         run: helm lint ./helm-chart
-
       - name: Connexion au registre GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Construire l'image Docker
-        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.IMAGE_NAME }}:latest .
-
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.IMAGE_NAME }}:latest -t ${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }} .
       - name: Scan de vulnérabilités (Trivy)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -61,8 +50,8 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           exit-code: "0"   # passer à "1" pour bloquer la CI si vulnérabilités critiques
-
       - name: Publier l'image sur le registre
         run: |
           docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_NAME }}:${{ env.APP_VERSION }}
