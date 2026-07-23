@@ -22,7 +22,9 @@ jobs:
       - name: Normaliser le nom de l'image en minuscules
         run: echo "IMAGE_NAME=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/sada-bousso-app" >> $GITHUB_ENV
       - name: Extraire la version applicative depuis values.yaml
-        run: echo "APP_VERSION=$(grep 'appVersion:' helm-chart/values.yaml | head -1 | sed 's/.*: *"\(.*\)"/\1/')" >> $GITHUB_ENV
+        run: |
+          APP_VERSION=$(grep 'appVersion:' helm-chart/values.yaml | head -1 | cut -d '"' -f2)
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
