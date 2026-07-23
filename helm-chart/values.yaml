@@ -7,7 +7,7 @@ replicaCount: 2
 
 image:
   repository: ghcr.io/sada729/sada-bousso-app
-  tag: "1.1.0"
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 appVersion: "1.1.0"
